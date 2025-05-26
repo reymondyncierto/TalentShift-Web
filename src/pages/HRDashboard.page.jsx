@@ -2,6 +2,7 @@ import { useState } from 'react';
 import Sidebar from '../components/HR/Sidebar.component';
 import DashboardView from '../components/HR/DashboardView.component';
 import UploadView from '../components/HR/UploadView.component';
+import CandidatesView from '../components/HR/CandidatesView.component';
 
 export default function HRDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard');
