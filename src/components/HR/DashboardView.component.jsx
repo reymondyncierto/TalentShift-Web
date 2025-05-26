@@ -1,4 +1,5 @@
 import DashboardCards from './DashboardCards.component';
+import RecentCandidates from './RecentCandidates.component';
 
 export default function DashboardView({ candidates }) {
   return (
@@ -11,6 +12,7 @@ export default function DashboardView({ candidates }) {
         processing={3}
       />
 
+      <RecentCandidates candidates={candidates} />
     </div>
   );
 }
