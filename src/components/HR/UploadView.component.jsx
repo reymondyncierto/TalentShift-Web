@@ -6,30 +6,33 @@ export default function UploadView({ onNewCandidate }) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [recentUploads, setRecentUploads] = useState([]);
 
-  const handleFileUpload = (e) => {
+  const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
     setIsProcessing(true);
 
-    // placeholder for file processing logic
-    setTimeout(() => {
-      const newCandidate = {
-        id: Date.now(),
-        name: "John Doe",
-        email: "john.doe@example.com",
-        phone: "(123) 456-7890",
-        skills: ["React", "Node.js", "Tailwind CSS"],
-        experience: "5 years",
-        education: "BS Computer Science",
-        status: "New",
-        lastUpdated: new Date().toLocaleDateString(),
-      };
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch(import.meta.env.VITE_API_URL, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) throw new Error('Upload failed');
+
+      const newCandidate = await response.json();
 
       onNewCandidate(newCandidate);
       setRecentUploads([newCandidate, ...recentUploads].slice(0, 3));
+      console.log('File uploaded successfully:', newCandidate);
+    } catch (error) {
+      console.error('Error uploading file:', error);
+    } finally {
       setIsProcessing(false);
-    }, 2000);
+    }
   };
 
   return (
