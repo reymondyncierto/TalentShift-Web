@@ -34,15 +34,13 @@ export default function HRDashboard() {
           ...user,
           experience: experience?.filter((exp) => exp.user_id === user.id) || [],
           education: education?.filter((edu) => edu.user_id === user.id) || [],
-          technicalSkills: technicalSkills?.filter((skill) => skill.user_id === user.id) || [],
+          technicalSkills: technicalSkills?.filter((skill) => skill.user_id === user.id).map((skill) => skill.skill) || [],
           certifications: certifications?.filter((cert) => cert.user_id === user.id) || [],
           projects: projects?.filter((project) => project.user_id === user.id) || [],
           hackathons: hackathons?.filter((hack) => hack.user_id === user.id) || [],
         }));
 
         setCandidates(usersWithData)
-
-        console.log(candidates)
 
       } catch (error) {
         console.error('Error initializing Supabase:', error);

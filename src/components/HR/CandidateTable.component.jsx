@@ -22,7 +22,7 @@ export default function CandidateTable({ candidates }) {
                 </td>
                 <td className="px-4 py-3 whitespace-nowrap">
                   <div className="flex flex-wrap gap-1">
-                    {candidate.skills.slice(0, 3).map(skill => (
+                    {candidate.technicalSkills.map(skill => (
                       <Badge key={skill} color="indigo">{skill}</Badge>
                     ))}
                   </div>
