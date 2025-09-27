@@ -28,7 +28,7 @@ export default function ContactForm({
               It only takes a minute. Your information will be reviewed by the HR team.
             </p>
 
-            <ResumeUpload onFileUpload={onFileUpload} />
+            <ResumeUpload onFileUpload={onFileUpload} isProcessing={isProcessing} />
 
             <form onSubmit={onSubmit}>
               <h3 className="text-lg font-semibold mb-4 border-b pb-2">Contact Details</h3>

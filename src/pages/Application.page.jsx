@@ -17,16 +17,50 @@ export default function ApplicantLandingPage() {
   });
 
   const handleFileUpload = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
 
     setIsProcessing(true);
 
-    // placeholder for file upload logic
-    setTimeout(() => {
-      setIsProcessing(false);
-      setIsSuccess(true);
-    }, 3000);
+    const upload = async () => {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const apiBase = import.meta.env.VITE_API_URL || '';
+      const url = `${apiBase.replace(/\/$/, '')}/convert/pdf`;
+      console.log('Applicant upload to:', url);
+
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          body: formData,
+          signal: controller.signal,
+        });
+        clearTimeout(timeoutId);
+
+        if (!res.ok) {
+          const text = await res.text().catch(() => null);
+          console.error('Upload failed:', res.status, text);
+          setIsSuccess(false);
+          return;
+        }
+
+        const payload = await res.json().catch(() => null);
+        console.log('Upload successful:', payload);
+        setIsSuccess(true);
+      } catch (err) {
+        if (err.name === 'AbortError') console.error('Upload aborted (timeout)');
+        else console.error('Upload error:', err);
+        setIsSuccess(false);
+      } finally {
+        setIsProcessing(false);
+      }
+    };
+
+    upload();
   };
 
   const handleInputChange = (e) => {
