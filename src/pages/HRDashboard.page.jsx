@@ -12,6 +12,28 @@ export default function HRDashboard() {
   useEffect(() => {
     async function initSupabase() {
       try {
+        const safeQuery = async (query) => {
+          try {
+            const res = await query;
+            // ensure we always return an object with data (default [])
+            if (!res || typeof res !== 'object') return { data: [] };
+            if (res.error) {
+              // if the error code indicates missing table, return empty data
+              if (res.error.code === 'PGRST205' || res.error.message?.includes("Could not find the table")) {
+                return { data: [] };
+              }
+            }
+            return { data: res.data ?? [] };
+          } catch (err) {
+            // if thrown and looks like PGRST205, treat as empty
+            if (err?.code === 'PGRST205' || err?.message?.includes("Could not find the table")) {
+              return { data: [] };
+            }
+            // otherwise rethrow so higher-level catch can log it
+            throw err;
+          }
+        };
+
         const [
           { data: users },
           { data: experience },
@@ -21,13 +43,13 @@ export default function HRDashboard() {
           { data: projects },
           { data: hackathons },
         ] = await Promise.all([
-          supabase.from('users').select('*'),
-          supabase.from('experience').select('*'),
-          supabase.from('education').select('*'),
-          supabase.from('technical_skills').select('*'),
-          supabase.from('certifications').select('*'),
-          supabase.from('projects').select('*'),
-          supabase.from('hackathons').select('*'),
+          safeQuery(supabase.from('users').select('*')),
+          safeQuery(supabase.from('experience').select('*')),
+          safeQuery(supabase.from('education').select('*')),
+          safeQuery(supabase.from('technical_skills').select('*')),
+          safeQuery(supabase.from('certifications').select('*')),
+          safeQuery(supabase.from('projects').select('*')),
+          safeQuery(supabase.from('hackathons').select('*')),
         ]);
 
         const usersWithData = users?.map((user) => ({
