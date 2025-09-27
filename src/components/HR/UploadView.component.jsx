@@ -16,20 +16,39 @@ export default function UploadView({ onNewCandidate }) {
     formData.append('file', file);
 
     try {
-      const response = await fetch(import.meta.env.VITE_API_URL, {
+      const apiBase = import.meta.env.VITE_API_URL || '';
+      const base = `${apiBase.replace(/\/$/, '')}/convert/pdf`;
+
+      // abort timeout to avoid hanging uploads
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s
+
+      const response = await fetch(base, {
         method: 'POST',
         body: formData,
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
 
-      if (!response.ok) throw new Error('Upload failed');
+      if (!response.ok) {
+        await response.text().catch(() => null);
+        throw new Error('Upload failed');
+      }
 
-      const newCandidate = await response.json();
+      const newCandidate = await response.json().catch(() => null);
 
-      onNewCandidate(newCandidate);
-      setRecentUploads([newCandidate, ...recentUploads].slice(0, 3));
-      console.log('File uploaded successfully:', newCandidate);
+      if (newCandidate) {
+        onNewCandidate(newCandidate);
+        setRecentUploads([newCandidate, ...recentUploads].slice(0, 3));
+      } else {
+        console.warn('Upload returned no JSON payload');
+      }
     } catch (error) {
-      console.error('Error uploading file:', error);
+      if (error.name === 'AbortError') {
+        console.error('Upload aborted (timeout)');
+      } else {
+        console.error('Error uploading file:', error);
+      }
     } finally {
       setIsProcessing(false);
     }
